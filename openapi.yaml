@@ -1,0 +1,233 @@
+openapi: 3.0.0
+info:
+  title: BBS API
+  version: 1.0.0
+  description: BBSに関連するAPIの仕様
+
+servers:
+  - url: http://localhost:8080/v1/api
+    description: ローカル開発環境
+  - url: https://api.example.com/v1/api
+    description: ステージング環境
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters"
+        detail:
+          type: string
+          example: "The 'id' parameter must be a positive integer."
+    NotFoundResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Resource not found"
+        detail:
+          type: string
+          example: "The post with ID 123 was not found."
+
+paths:
+  /list:
+    get:
+      summary: 投稿一覧を取得する
+      description: 投稿の一覧を取得するためのAPI
+      tags:
+        - posts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: ページ番号
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          required: true
+          description: 1ページあたりの表示数
+      responses:
+        '200':
+          description: 成功時のレスポンス
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    content:
+                      type: string
+        '400':
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /detail/{id}:
+    get:
+      summary: 投稿の詳細を取得する
+      description: 指定された投稿の詳細を取得する
+      tags:
+        - posts
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 投稿のID
+      responses:
+        '200':
+          description: 成功時のレスポンス
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  content:
+                    type: string
+        '404':
+          description: 投稿が見つからなかった場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  /create:
+    post:
+      summary: 投稿を作成する
+      description: 新しい投稿を作成する
+      tags:
+        - posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '201':
+          description: 投稿が正常に作成された場合
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  content:
+                    type: string
+        '400':
+          description: 入力データが不正な場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /delete/{id}:
+    delete:
+      summary: 投稿を削除する
+      description: 指定された投稿を削除する
+      tags:
+        - posts
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 削除する投稿のID
+      responses:
+        '200':
+          description: 投稿が正常に削除された場合
+        '404':
+          description: 投稿が見つからなかった場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+
+  /update/{id}:
+    put:
+      summary: 投稿を更新する
+      description: 指定された投稿を更新する
+      tags:
+        - posts
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: 更新する投稿のID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: 投稿が正常に更新された場合
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  content:
+                    type: string
+        '400':
+          description: 入力データが不正な場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 投稿が見つからなかった場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
