@@ -5,7 +5,7 @@
 package main
 
 import (
-	"bbs-project/routers"
+	"bbs-gql-project/routers"
 )
 
 func main() {
